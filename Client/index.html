@@ -220,7 +220,7 @@
 
     function sendMessage(event, from_name, to_uid, to_uname, msg, from_head) {
         msg = msg ? msg : $("#message").val();
-        if (to_uname != '') {
+        if (to_uname != '' && to_uname != '所有用户') {
             var originalMsg = msg;
             msg = '您对 ' + to_uname + ' 说： ' + msg;
 
