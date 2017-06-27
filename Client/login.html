@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]>
+<html lang="en" class="no-js ie6 lt8"> <![endif]-->
+<!--[if IE 7 ]>
+<html lang="en" class="no-js ie7 lt8"> <![endif]-->
+<!--[if IE 8 ]>
+<html lang="en" class="no-js ie8 lt8"> <![endif]-->
+<!--[if IE 9 ]>
+<html lang="en" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html lang="en" class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="UTF-8"/>
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">  -->
+    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Login and Registration Form with HTML5 and CSS3"/>
+    <meta name="keywords" content="html5, css3, form, switch, animation, :target, pseudo-class"/>
+    <meta name="author" content="Codrops"/>
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" type="text/css" href="css/demo.css"/>
+    <link rel="stylesheet" type="text/css" href="css/style2.css"/>
+    <link rel="stylesheet" type="text/css" href="css/animate-custom.css"/>
+</head>
+<body>
+<div class="container">
+    <header>
+    </header>
+    <section>
+        <div id="container_demo">
+            <!-- hidden anchor to stop jump http://www.css3create.com/Astuce-Empecher-le-scroll-avec-l-utilisation-de-target#wrap4  -->
+            <a class="hiddenanchor" id="toregister"></a>
+            <a class="hiddenanchor" id="tologin"></a>
+            <div id="wrapper">
+                <div id="login" class="animate form">
+                    <form action="#" autocomplete="on">
+                        <h1>Log in</h1>
+                        <p>
+                            <label for="username" class="uname" data-icon="u"> Your email or username </label>
+                            <input id="username" name="username" required="required" type="text"
+                                   placeholder="myusername or mymail@mail.com"/>
+                        </p>
+                        <p>
+                            <label for="password" class="youpasswd" data-icon="p"> Your password </label>
+                            <input id="password" name="password" required="required" type="password"
+                                   placeholder="eg. X8df!90EO"/>
+                        </p>
+                        <p class="keeplogin">
+                            <input type="checkbox" name="loginkeeping" id="loginkeeping" value="loginkeeping"/>
+                            <label for="loginkeeping">Keep me logged in</label>
+                        </p>
+                        <p class="login button">
+                            <input type="submit" id="loginButton" value="Login"/>
+                        </p>
+                        <p class="change_link">
+                            Not a member yet ?
+                            <a href="#toregister" class="to_register">Join us</a>
+                        </p>
+                    </form>
+                </div>
+
+                <div id="register" class="animate form">
+                    <form autocomplete="on">
+                        <h1> Sign up </h1>
+                        <p>
+                            <label for="usernamesignup" class="uname" data-icon="u">Your username</label>
+                            <input id="usernamesignup" name="usernamesignup" required="required" type="text"
+                                   placeholder="mysuperusername690"/>
+                        </p>
+                        <p>
+                            <label for="emailsignup" class="youmail" data-icon="e"> Your email</label>
+                            <input id="emailsignup" name="emailsignup" required="required" type="email"
+                                   placeholder="mysupermail@mail.com"/>
+                        </p>
+                        <p>
+                            <label for="passwordsignup" class="youpasswd" data-icon="p">Your password </label>
+                            <input id="passwordsignup" name="passwordsignup" required="required" type="password"
+                                   placeholder="eg. X8df!90EO"/>
+                        </p>
+                        <p>
+                            <label for="passwordsignup_confirm" class="youpasswd" data-icon="p">Please confirm your
+                                password </label>
+                            <input id="passwordsignup_confirm" name="passwordsignup_confirm" required="required"
+                                   type="password" placeholder="eg. X8df!90EO"/>
+                        </p>
+                        <p class="signin button">
+                            <input type="submit" id="registerButton" value="Sign up"/>
+                        </p>
+                        <p class="change_link">
+                            Already a member ?
+                            <a href="#tologin" class="to_register"> Go and log in </a>
+                        </p>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script>
+
+    var wsServer = 'ws://144.168.61.69:1992';
+    var websocket = new WebSocket(wsServer);
+    var loginFlag = false;
+    var registerFlag = false;
+
+    websocket.onopen = function (evt) {
+        console.log("Connected to server1.");
+    };
+
+    websocket.onmessage = function (evt) {
+        var data = JSON.parse(evt.data);
+
+        if (data.type == 'login' && data.status == 'success') {
+            //存储全局变量
+            sessionStorage.user = data.user;
+            location.href = 'index.html';
+        } else if (data.type == 'login' && data.status == 'fail') {
+            alert("登陆失败，请重新登陆或注册后登陆");
+            loginFlag = false;
+        } else if (data.type == 'register' && data.status == 'success') {
+            alert("注册成功，请登陆");
+            location.href = "#tologin";
+            registerFlag = false;
+        } else if (data.type == 'register' && data.status == 'fail') {
+            alert("注册失败");
+            registerFlag = false;
+        }
+    };
+
+    $("#loginButton").click(function (e) {
+        var username = $("#username").val();
+        var password = $("#password").val();
+
+        if (!username || !password) {
+            return false;
+        }
+
+        if (loginFlag) {
+            return false;
+        }
+
+        var sendData = {
+            "username": username,
+            "password": password,
+            "action": "login",
+        };
+        websocket.send(JSON.stringify(sendData));
+
+        loginFlag = true;
+
+    });
+
+    $("#login").submit(function (e) {
+        return false;
+    });
+
+    $("#registerButton").click(function (e) {
+        var username = $("#usernamesignup").val();
+        var email = $("#emailsignup").val();
+        var password = $("#passwordsignup").val();
+        var passwordConfirm = $("#passwordsignup_confirm").val();
+
+        if (!username || !password || !password || !passwordConfirm) {
+            alert("信息填写不完整");
+            return false;
+        }
+
+        if (password != passwordConfirm) {
+            alert("密码不一致，请确认");
+            return false;
+        }
+
+        if (registerFlag) {
+            return false;
+        }
+
+        var sendData = {
+            "username": username,
+            "email": email,
+            "password": password,
+            "action": "register",
+        };
+        websocket.send(JSON.stringify(sendData));
+        registerFlag = true;
+    });
+
+    $("#register").submit(function (e) {
+        return false;
+    });
+
+
+</script>

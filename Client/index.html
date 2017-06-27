@@ -1,0 +1,370 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>聊天室 - editor:yinq</title>
+    <link rel="shortcut icon" href="favicon.png">
+    <link rel="icon" href="favicon.png" type="image/x-icon">
+    <link type="text/css" rel="stylesheet" href="css/style.css">
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+</head>
+
+<body>
+<!--弹出层-->
+<div class="popups_bg"></div>
+<div class="popups_box">正在连接服务器,请稍等...</div>
+
+<!--聊天主界面-->
+<div class="chatbox">
+    <div class="chat_top fn-clear">
+        <div class="logo"><img src="images/logo.png" width="190" height="60" alt=""/></div>
+        <div class="uinfo fn-clear">
+            <div class="uface" id="myFace"><img src="images/hetu.jpg" width="40" height="40" alt=""/></div>
+            <div class="uname" id="myName">
+                <span></span><i class="fontico down"></i>
+                <ul class="managerbox">
+                    <li><a href="#"><i class="fontico lock"></i>修改密码</a></li>
+                    <li><a href="#"><i class="fontico logout"></i>退出登录</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="chat_message fn-clear">
+        <div class="chat_left">
+            <div class="message_box" id="message_box">
+                <!--<div class="msg_item fn-clear">-->
+                <!--<div class="uface"><img src="images/53f44283a4347.jpg" width="40" height="40" alt=""/></div>-->
+                <!--<div class="item_right">-->
+                <!--<div class="name_time">猫猫 · 3分钟前</div>-->
+                <!--<div class="msg">近日，TIOBE发布了2014年9月的编程语言排行榜，Java、C++跌至历史最低点，前三名则没有变化，依旧是C、Java、Objective-C。-->
+                <!--</div>-->
+                <!--</div>-->
+                <!--</div>-->
+
+                <!--<div class="msg_item fn-clear">-->
+                <!--<div class="uface"><img src="images/53f442834079a.jpg" width="40" height="40" alt=""/></div>-->
+                <!--<div class="item_right">-->
+                <!--<div class="name_time">白猫 · 1分钟前</div>-->
+                <!--<div class="msg">(Visual) FoxPro, 4th Dimension/4D, Alice, APL, Arc, Automator, Awk, Bash, bc,-->
+                <!--Bourne shell, C++CLI, CFML, cg, CL (OS/400), Clean, Clojure, Emacs Lisp, Factor, Forth,-->
+                <!--Hack, Icon, Inform, Io, Ioke, J, JScript.NET, LabVIEW, LiveCode, M4, Magic, Max/MSP,-->
+                <!--Modula-2, Moto, NATURAL, OCaml, OpenCL, Oz, PILOT, Programming Without Coding Technology,-->
+                <!--Prolog, Pure Data, Q, RPG (OS/400), S, Smalltalk, SPARK, Standard ML, TOM, VBScript, Z shell-->
+                <!--</div>-->
+                <!--</div>-->
+                <!--</div>-->
+
+                <!--<div class="msg_item fn-clear own">-->
+                <!--<div class="uface"><img src="images/hetu.jpg" width="40" height="40" alt=""/></div>-->
+                <!--<div class="item_right">-->
+                <!--<div class="name_time">河图 · 30秒前</div>-->
+                <!--<div class="msg">11</div>-->
+                <!--</div>-->
+                <!--</div>-->
+            </div>
+            <div class="write_box">
+                <textarea id="message" name="message" class="write_area" placeholder="说点啥吧..."></textarea>
+                <input type="hidden" name="fromname" id="fromname" value=""/>
+                <input type="hidden" name="fromnameHead" id="fromnameHead" value=""/>
+                <input type="hidden" name="to_uid" id="to_uid" value="0">
+                <div class="facebox fn-clear">
+                    <div class="expression"></div>
+                    <div class="chat_type" id="chat_type">群聊</div>
+                    <button name="" class="sub_but">提 交</button>
+                </div>
+            </div>
+        </div>
+        <div class="chat_right">
+            <ul class="user_list" title="双击用户私聊">
+                <li class="fn-clear selected"><em>所有用户</em></li>
+                <!--<li class="fn-clear" data-id="1"><span><img src="images/head/02001.jpg" width="30" height="30" alt=""/></span><em>zali23</em>-->
+                <!--<small class="online" title="在线"></small>-->
+                <!--</li>-->
+                <!--<li class="fn-clear" data-id="2"><span><img src="images/head/02002.jpg" width="30" height="30"-->
+                <!--alt=""/></span><em>zali001</em>-->
+                <!--<small class="online" title="在线"></small>-->
+                <!--</li>-->
+                <!--<li class="fn-clear" data-id="3"><span><img src="images/53f442834079a.jpg" width="30" height="30"-->
+                <!--alt=""/></span><em>白猫</em>-->
+                <!--<small class="offline" title="离线"></small>-->
+                <!--</li>-->
+            </ul>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var user = sessionStorage.user;
+    if (!user) {
+        alert('用户登陆已失效，请重新登陆');
+        location.href = "login.html";
+    }
+
+    $("#fromname").val(user);   //初始化个人账号
+
+    //ws
+    var wsServer = 'ws://144.168.61.69:1992';
+    var websocket = new WebSocket(wsServer);
+    popupsShow();   //初始化连接服务器时开启弹窗
+
+    websocket.onopen = function (evt) {
+        console.log("Connected to WebSocket server.");
+        var loginData = {
+            "username": user,
+            "action": "online",
+        };
+        websocket.send(JSON.stringify(loginData));
+        var getOnlineList = {
+            "action": "getOnlineList",
+        };
+        websocket.send(JSON.stringify(getOnlineList));
+        var getHistoryMsg = {
+            "action": "getHistoryMsg",
+        };
+        websocket.send(JSON.stringify(getHistoryMsg));
+    };
+
+    websocket.onclose = function (evt) {
+        console.log("Disconnected");
+        alert('连接已断开，请重新登陆');
+//        location.href = "login.html";
+    };
+    websocket.onmessage = function (evt) {
+//        console.log('Retrieved data from server: ' + evt.data);
+//            sendMessage(evt, fromname, to_uid, to_uname, evt.data);
+
+        var data = JSON.parse(evt.data);
+
+        switch (data.type) {
+            case 'getOnlineList':   //拉取在线列表
+                initOnlineList(data.list, user);
+                break;
+            case 'getHistoryMsg':   //拉取历史消息
+                initHistoryMsg(data.list, user);
+                break;
+            case 'sbOnlineNotification':    //上线通知
+                sbOnline(data.user);
+                break;
+            case 'sbOfflineNotification':   //下线通知
+                sbOffline(data.user);
+                break;
+            case 'kickAccount':         //踢号
+                alert('当前账号已在另一处登陆');
+                location.href = "login.html";
+                break;
+            case 'receiveGroupMsg': //收到群聊消息
+                receiveGroupMsg(data.data);
+                break;
+            case 'receiveMsg':  //收到私聊消息
+                receiveMsg(data.data);
+                break;
+            default:
+                break;
+        }
+    };
+
+    websocket.onerror = function (evt, e) {
+        console.log('Error occured: ' + evt.data);
+    };
+
+    $(document).ready(function (e) {
+        $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
+        $('.uname').hover(
+            function () {
+                $('.managerbox').stop(true, true).slideDown(100);
+            },
+            function () {
+                $('.managerbox').stop(true, true).slideUp(100);
+            }
+        );
+
+        var fromname = $('#fromname').val();
+        var to_uid = 0; // 默认为0,表示发送给所有用户
+        var to_uname = '';
+
+        //私聊
+        $('.user_list').on('dblclick', 'li', function () {
+            to_uname = $(this).find('em').text();
+//            to_uid = $(this).attr('data-attr');
+            if (to_uname == fromname) {
+                alert('您不能和自己聊天!');
+                return false;
+            }
+            if (to_uname == '所有用户') {
+                $("#toname").val('');
+                $('#chat_type').text('群聊');
+            } else {
+//                $("#toname").val(to_uid);
+                $('#chat_type').text('您正和 ' + to_uname + ' 聊天');
+            }
+            $(this).addClass('selected').siblings().removeClass('selected');
+            $('#message').focus().attr("placeholder", "您对" + to_uname + "说：");
+        });
+
+        $('.sub_but').click(function (event) {
+            var head = $("#fromnameHead").val();
+            sendMessage(event, fromname, to_uid, to_uname, '', head);
+        });
+
+        /*按下按钮或键盘按键*/
+        $("#message").keydown(function (event) {
+            var e = window.event || event;
+            var k = e.keyCode || e.which || e.charCode;
+            //按下ctrl+enter发送消息
+            if ((event.ctrlKey && (k == 13 || k == 10) )) {
+                var head = $("#fromnameHead").val();
+                sendMessage(event, fromname, to_uid, to_uname, '', head);
+            }
+        });
+
+    });
+
+    function sendMessage(event, from_name, to_uid, to_uname, msg, from_head) {
+        msg = msg ? msg : $("#message").val();
+        if (to_uname != '') {
+            var originalMsg = msg;
+            msg = '您对 ' + to_uname + ' 说： ' + msg;
+
+            var msgData = {
+                "send": from_name,
+                "receive": to_uname,
+                "msg": originalMsg,
+                "action": "privateChat",
+            };
+            websocket.send(JSON.stringify(msgData));
+        } else {    //群聊
+            var msgData = {
+                "username": user,
+                "msg": msg,
+                "action": "groupChat",
+            };
+            websocket.send(JSON.stringify(msgData));
+        }
+        var htmlData = '<div class="msg_item fn-clear own">'
+            + '   <div class="uface"><img src="' + from_head + '" width="40" height="40"  alt=""/></div>'
+            + '   <div class="item_right">'
+            + '     <div class="name_time">' + from_name + ' ·' + getDate() + '</div>'
+            + '     <div class="msg">' + msg + '</div>'
+            + '   </div>'
+            + '</div>';
+        $("#message_box").append(htmlData);
+        $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
+        $("#message").val('');
+    }
+
+
+    function getDate() {
+        var myDate = new Date();
+        var returnDate = (myDate.getMonth() + 1) + '-' + myDate.getDate()
+            + ' ' + myDate.getHours() + ':' + myDate.getMinutes() + ':'
+            + myDate.getSeconds();
+        return returnDate;
+    }
+
+    /**
+     * 开启弹窗
+     */
+    function popupsShow() {
+        $('.popups_bg,.popups_box').show();
+    }
+
+    /**
+     * 关闭弹窗
+     */
+    function popupsHidden() {
+        $('.popups_bg,.popups_box').hide();
+    }
+</script>
+
+<script>
+    var baseUserLi = '<li class="fn-clear" data-attr=""><span><img src="images/head/02001.jpg" width="30" height="30" alt=""/></span><em></em>\
+            <small class="online" title="在线"></small>\
+            </li>';
+
+    var baseMsgData = '<div class="msg_item fn-clear">'
+        + '   <div class="uface"><img src="" width="40" height="40"  alt=""/></div>'
+        + '   <div class="item_right">'
+        + '     <div class="name_time"></div>'
+        + '     <div class="msg"></div>'
+        + '   </div>'
+        + '</div>';
+
+    function initOnlineList(list, user) {
+        $.each(list, function (i, v) {
+            var appendLi = $(baseUserLi).clone();
+            appendLi.find('img').attr('src', "images/head/" + v.head + ".jpg");
+            appendLi.attr('data-attr', v.username).find('em').html(v.username);
+            if (v.username == user) {
+                $("#fromnameHead").val("images/head/" + v.head + ".jpg");
+                $("#myFace>img").attr("src", "images/head/" + v.head + ".jpg");
+                $("#myName").find('span').eq(0).text(v.username);
+            }
+
+            $('.user_list').append(appendLi);
+            popupsHidden(); //数据初始化完毕关闭连接弹窗
+        });
+    }
+
+    function initHistoryMsg(list, user) {
+        var k = 0;
+        $.each(list, function (i, v) {
+            var htmlData = $(baseMsgData).clone();
+
+            htmlData.find('.msg').text(v.msg);
+            htmlData.find('.uface>img').attr("src", v.head);
+            htmlData.find('.name_time').text(v.username + ' ·' + v.time);
+            if (v.username == user) {
+                htmlData.addClass('own');
+            }
+
+            $("#message_box").append(htmlData);
+            k++;
+        });
+        $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20 * k);
+    }
+
+    function sbOnline(user) {
+        //离线再上线
+        var isExist = $('.user_list>li[data-attr="' + user.username + '"]');
+
+        if (isExist.length) {
+            isExist.find('small').attr('class', 'online').attr('title', '在线');
+        } else {    //新上线
+            var appendLi = $(baseUserLi).clone();
+            appendLi.find('img').attr('src', "images/head/" + user.head + ".jpg");
+            appendLi.attr('data-attr', user.username).find('em').html(user.username);
+
+            $('.user_list').append(appendLi);
+        }
+    }
+
+    function sbOffline(user) {
+        $('.user_list>li[data-attr="' + user.username + '"]').find('small').attr('class', 'offline').attr('title', '离线');
+    }
+
+    function receiveGroupMsg(data) {
+        var htmlData = '<div class="msg_item fn-clear">'
+            + '   <div class="uface"><img src="' + data.head + '" width="40" height="40"  alt=""/></div>'
+            + '   <div class="item_right">'
+            + '     <div class="name_time">' + data.user + ' ·' + data.time + '</div>'
+            + '     <div class="msg">' + data.msg + '</div>'
+            + '   </div>'
+            + '</div>';
+        $("#message_box").append(htmlData);
+        $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
+    }
+
+    function receiveMsg(data) {
+        var msg = data.user + '对您说：' + data.msg;
+        var htmlData = '<div class="msg_item fn-clear">'
+            + '   <div class="uface"><img src="' + data.head + '" width="40" height="40"  alt=""/></div>'
+            + '   <div class="item_right">'
+            + '     <div class="name_time">' + data.user + ' ·' + data.time + '</div>'
+            + '     <div class="msg">' + msg + '</div>'
+            + '   </div>'
+            + '</div>';
+        $("#message_box").append(htmlData);
+        $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
+    }
+</script>
+</body>
+</html>
