@@ -104,6 +104,7 @@
 
     var wsServer = 'ws://144.168.61.69:1992';
     var websocket = new WebSocket(wsServer);
+
     var loginFlag = false;
     var registerFlag = false;
 
@@ -131,6 +132,10 @@
         }
     };
 
+    websocket.onerror = function (evt) {
+       alert('服务器连接失败，请刷新或者稍后再试');
+    };
+
     $("#loginButton").click(function (e) {
         var username = $("#username").val();
         var password = $("#password").val();
@@ -148,7 +153,12 @@
             "password": password,
             "action": "login",
         };
-        websocket.send(JSON.stringify(sendData));
+
+        try {
+            websocket.send(JSON.stringify(sendData));
+        } catch (e) {
+            alert('服务器连接失败,请刷新或稍后再试');
+        }
 
         loginFlag = true;
 
