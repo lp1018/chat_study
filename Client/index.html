@@ -169,12 +169,12 @@
     $(document).ready(function (e) {
         $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
         $('.uname').hover(
-            function () {
-                $('.managerbox').stop(true, true).slideDown(100);
-            },
-            function () {
-                $('.managerbox').stop(true, true).slideUp(100);
-            }
+                function () {
+                    $('.managerbox').stop(true, true).slideDown(100);
+                },
+                function () {
+                    $('.managerbox').stop(true, true).slideUp(100);
+                }
         );
 
         var fromname = $('#fromname').val();
@@ -187,6 +187,7 @@
 //            to_uid = $(this).attr('data-attr');
             if (to_uname == fromname) {
                 alert('您不能和自己聊天!');
+                to_uname = '';
                 return false;
             }
             if (to_uname == '所有用户') {
@@ -240,12 +241,12 @@
             websocket.send(JSON.stringify(msgData));
         }
         var htmlData = '<div class="msg_item fn-clear own">'
-            + '   <div class="uface"><img src="' + from_head + '" width="40" height="40"  alt=""/></div>'
-            + '   <div class="item_right">'
-            + '     <div class="name_time">' + from_name + ' ·' + getDate() + '</div>'
-            + '     <div class="msg">' + msg + '</div>'
-            + '   </div>'
-            + '</div>';
+                + '   <div class="uface"><img src="' + from_head + '" width="40" height="40"  alt=""/></div>'
+                + '   <div class="item_right">'
+                + '     <div class="name_time">' + from_name + ' ·' + getDate() + '</div>'
+                + '     <div class="msg">' + msg + '</div>'
+                + '   </div>'
+                + '</div>';
         $("#message_box").append(htmlData);
         $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
         $("#message").val('');
@@ -255,8 +256,8 @@
     function getDate() {
         var myDate = new Date();
         var returnDate = (myDate.getMonth() + 1) + '-' + myDate.getDate()
-            + ' ' + myDate.getHours() + ':' + myDate.getMinutes() + ':'
-            + myDate.getSeconds();
+                + ' ' + myDate.getHours() + ':' + myDate.getMinutes() + ':'
+                + myDate.getSeconds();
         return returnDate;
     }
 
@@ -281,12 +282,12 @@
             </li>';
 
     var baseMsgData = '<div class="msg_item fn-clear">'
-        + '   <div class="uface"><img src="" width="40" height="40"  alt=""/></div>'
-        + '   <div class="item_right">'
-        + '     <div class="name_time"></div>'
-        + '     <div class="msg"></div>'
-        + '   </div>'
-        + '</div>';
+            + '   <div class="uface"><img src="" width="40" height="40"  alt=""/></div>'
+            + '   <div class="item_right">'
+            + '     <div class="name_time"></div>'
+            + '     <div class="msg"></div>'
+            + '   </div>'
+            + '</div>';
 
     function initOnlineList(list, user) {
         $.each(list, function (i, v) {
@@ -343,12 +344,12 @@
 
     function receiveGroupMsg(data) {
         var htmlData = '<div class="msg_item fn-clear">'
-            + '   <div class="uface"><img src="' + data.head + '" width="40" height="40"  alt=""/></div>'
-            + '   <div class="item_right">'
-            + '     <div class="name_time">' + data.user + ' ·' + data.time + '</div>'
-            + '     <div class="msg">' + data.msg + '</div>'
-            + '   </div>'
-            + '</div>';
+                + '   <div class="uface"><img src="' + data.head + '" width="40" height="40"  alt=""/></div>'
+                + '   <div class="item_right">'
+                + '     <div class="name_time">' + data.user + ' ·' + data.time + '</div>'
+                + '     <div class="msg">' + data.msg + '</div>'
+                + '   </div>'
+                + '</div>';
         $("#message_box").append(htmlData);
         $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
     }
@@ -356,12 +357,12 @@
     function receiveMsg(data) {
         var msg = data.user + '对您说：' + data.msg;
         var htmlData = '<div class="msg_item fn-clear">'
-            + '   <div class="uface"><img src="' + data.head + '" width="40" height="40"  alt=""/></div>'
-            + '   <div class="item_right">'
-            + '     <div class="name_time">' + data.user + ' ·' + data.time + '</div>'
-            + '     <div class="msg">' + msg + '</div>'
-            + '   </div>'
-            + '</div>';
+                + '   <div class="uface"><img src="' + data.head + '" width="40" height="40"  alt=""/></div>'
+                + '   <div class="item_right">'
+                + '     <div class="name_time">' + data.user + ' ·' + data.time + '</div>'
+                + '     <div class="msg">' + msg + '</div>'
+                + '   </div>'
+                + '</div>';
         $("#message_box").append(htmlData);
         $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
     }
